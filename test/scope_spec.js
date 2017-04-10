@@ -319,6 +319,7 @@ describe('Scope', function() {
 			// 遍历从数组尾部开始遍历
 			// 这样删除当前位置watcher后会向前一个位置偏移一位（向左偏移即下标小的位置）
 			// 此时新指向的位置正好是下一个需要遍历的元素
+			// 此处仍有疑问？？？？
 			scope.$digest();
 			expect(watchCalls).toEqual(['first', 'second', 'third', 'first', 'third']);
 		});
@@ -358,6 +359,29 @@ describe('Scope', function() {
 			expect(scope.counter).toBe(1);
 
 		});
+
+
+		it('allows destroying several $watches during digest', function() {
+		  	scope.aValue = 'abc';
+		  	scope.counter = 0;
+			var destroyWatch1 = scope.$watch(
+		  		function(scope) {
+		    		destroyWatch1();
+					destroyWatch2();
+				}
+			); 
+
+			var destroyWatch2 = scope.$watch(
+		  		function(scope) { return scope.aValue; },
+		  		function(newValue, oldValue, scope) {
+					scope.counter++;
+				}
+			);
+
+			scope.$digest();
+		  	expect(scope.counter).toBe(0);
+		});
+
 
 
 	});
