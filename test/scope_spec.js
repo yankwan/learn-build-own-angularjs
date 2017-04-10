@@ -221,5 +221,144 @@ describe('Scope', function() {
 		});
 
 
+		it('catches exceptions in watch functions and continues', function() {
+			scope.aValue = 'abc';
+			scope.counter = 0;
+			scope.$watch(
+				function(scope) { throw 'Error'; },
+				function(newValue, oldValue, scope) { }
+			);
+
+			scope.$watch(
+				function(scope) { return scope.aValue; },
+				function(newValue, oldValue, scope) {
+					scope.counter++;
+				}
+			);
+
+			scope.$digest();
+			expect(scope.counter).toBe(1);
+		});
+			
+
+		it('catches exceptions in listener functions and continues', function() {
+			scope.aValue = 'abc';
+			scope.counter = 0;
+			scope.$watch(
+				function(scope) { return scope.aValue; },
+				function(newValue, oldValue, scope) {
+					throw 'Error';
+				}
+			);
+
+			scope.$watch(
+				function(scope) { return scope.aValue; },
+				function(newValue, oldValue, scope) {
+					scope.counter++;
+				}
+			);
+
+			scope.$digest();
+			expect(scope.counter).toBe(1);
+		});
+
+
+		it('allows destroying a $watch with a removal function', function() {
+			scope.aValue = 'abc';
+			scope.counter = 0;
+
+			// 返回一个函数，那么$watch应该要包装一个返回函数
+			// destroyWatch指向这个函数，destroyWatch()就是调用$watch中的返回函数
+			var destroyWatch = scope.$watch(
+				function(scope) { return scope.aValue; },
+				function(newValue, oldValue, scope) {
+					scope.counter++;
+				}
+			);
+
+			scope.$digest();
+			expect(scope.counter).toBe(1);
+
+			scope.aValue = 'def';
+			scope.$digest();
+			expect(scope.counter).toBe(2);
+
+			scope.aValue = 'ghi';
+			destroyWatch();
+			scope.$digest();
+			expect(scope.counter).toBe(2);
+		});
+
+		it('allows destroying a $watch during digest', function() {
+			scope.aValue = 'abc';
+			var watchCalls = [];
+
+			scope.$watch(
+				function(scope) {
+					watchCalls.push('first');
+					return scope.aValue;
+				}
+			);
+
+			var destroyWatch = scope.$watch(
+				function(scope) {
+					watchCalls.push('second');
+					destroyWatch();
+				}
+			);
+
+
+			scope.$watch(
+				function(scope) {
+					watchCalls.push('third');
+					return scope.aValue;
+				}
+			);
+
+			// 将$$watchers的添加方式更改为从数组头开始添加
+			// 遍历从数组尾部开始遍历
+			// 这样删除当前位置watcher后会向前一个位置偏移一位（向左偏移即下标小的位置）
+			// 此时新指向的位置正好是下一个需要遍历的元素
+			scope.$digest();
+			expect(watchCalls).toEqual(['first', 'second', 'third', 'first', 'third']);
+		});
+
+
+
+		it('allows a $watch to destroy another during digest', function() {
+
+			scope.aValue = 'abc';
+			scope.counter = 0;
+
+			scope.$watch(
+				function(scope) {
+					return scope.aValue;
+				},
+				function(newValue, oldValue, scope) {
+					destroyWatch();
+				}
+			);
+
+			var destroyWatch = scope.$watch(
+				function(scope) { },
+				function(newValue, oldValue, scope) { }
+			);
+
+
+			scope.$watch(
+				function(scope) { return scope.aValue; },
+				function(newValue, oldValue, scope) {
+					scope.counter++;
+				}
+			);
+
+			// 执行$digest()方法前，3个watch都已经添加进$$watchers
+			// 第一个watch执行listenerFn时才删除第二个watcher
+			scope.$digest();
+			expect(scope.counter).toBe(1);
+
+		});
+
+
 	});
 });
