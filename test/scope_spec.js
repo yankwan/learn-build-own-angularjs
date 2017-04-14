@@ -36,7 +36,7 @@ describe('Scope', function() {
 			scope.$watch(
 				function(scope) { return scope.someValue; },
 				function(newValue, oldValue, scope) { scope.counter++; }
-			);
+				);
 
 			expect(scope.counter).toBe(0);
 
@@ -60,7 +60,7 @@ describe('Scope', function() {
 			scope.$watch(
 				function(scope) { return scope.someValue; },
 				function(newValue, oldValue, scope) { scope.counter++; }
-			);
+				);
 			scope.$digest();
 			expect(scope.counter).toBe(1);
 		});
@@ -72,7 +72,7 @@ describe('Scope', function() {
 			scope.$watch(
 				function(scope) { return scope.someValue; },
 				function(newValue, oldValue, scope) { oldValueGiven = oldValue; }
-			);
+				);
 			scope.$digest();
 			expect(oldValueGiven).toBe(123);
 		});
@@ -96,7 +96,7 @@ describe('Scope', function() {
 						scope.initial = newValue.substring(0, 1) + '.';
 					}
 				}
-			);
+				);
 
 			scope.$watch(
 				function(scope) { return scope.name; },
@@ -105,7 +105,7 @@ describe('Scope', function() {
 						scope.nameUpper = newValue.toUpperCase();
 					}
 				}	
-			);
+				);
 
 			// $$watchers数组中保存连个watcher
 			// 通过设置dirty标志位来判断每次循环中，是否全部监视的变量都没有再改变
@@ -129,14 +129,14 @@ describe('Scope', function() {
 				function(newValue, oldValue, scope) {
 					scope.counterB++;
 				}
-			);
+				);
 
 			scope.$watch(
 				function(scope) { return scope.counterB; },
 				function(newValue, oldValue, scope) {
 					scope.counterA++;
 				}
-			);
+				);
 
 			expect((function() { scope.$digest(); })).toThrow();
 		});
@@ -152,7 +152,7 @@ describe('Scope', function() {
 						return scope.array[i];
 					},
 					function(newValue, oldValue, scope) { }
-				);
+					);
 			});
 
 			scope.$digest();
@@ -175,9 +175,9 @@ describe('Scope', function() {
 						function(newValue, oldValue, scope) {
 							scope.counter++;
 						}
-					);
+						);
 				}
-			);
+				);
 
 			scope.$digest();
 			expect(scope.counter).toBe(1);
@@ -192,7 +192,7 @@ describe('Scope', function() {
 					scope.counter++;
 				},
 				true
-			);
+				);
 
 			scope.$digest();
 			expect(scope.counter).toBe(1);
@@ -211,7 +211,7 @@ describe('Scope', function() {
 				function(newValue, oldValue, scope) {
 					scope.counter++;
 				}
-			);
+				);
 
 			scope.$digest();
 			expect(scope.counter).toBe(1);
@@ -227,19 +227,19 @@ describe('Scope', function() {
 			scope.$watch(
 				function(scope) { throw 'Error'; },
 				function(newValue, oldValue, scope) { }
-			);
+				);
 
 			scope.$watch(
 				function(scope) { return scope.aValue; },
 				function(newValue, oldValue, scope) {
 					scope.counter++;
 				}
-			);
+				);
 
 			scope.$digest();
 			expect(scope.counter).toBe(1);
 		});
-			
+
 
 		it('catches exceptions in listener functions and continues', function() {
 			scope.aValue = 'abc';
@@ -249,14 +249,14 @@ describe('Scope', function() {
 				function(newValue, oldValue, scope) {
 					throw 'Error';
 				}
-			);
+				);
 
 			scope.$watch(
 				function(scope) { return scope.aValue; },
 				function(newValue, oldValue, scope) {
 					scope.counter++;
 				}
-			);
+				);
 
 			scope.$digest();
 			expect(scope.counter).toBe(1);
@@ -274,7 +274,7 @@ describe('Scope', function() {
 				function(newValue, oldValue, scope) {
 					scope.counter++;
 				}
-			);
+				);
 
 			scope.$digest();
 			expect(scope.counter).toBe(1);
@@ -298,14 +298,14 @@ describe('Scope', function() {
 					watchCalls.push('first');
 					return scope.aValue;
 				}
-			);
+				);
 
 			var destroyWatch = scope.$watch(
 				function(scope) {
 					watchCalls.push('second');
 					destroyWatch();
 				}
-			);
+				);
 
 
 			scope.$watch(
@@ -313,7 +313,7 @@ describe('Scope', function() {
 					watchCalls.push('third');
 					return scope.aValue;
 				}
-			);
+				);
 
 			// 将$$watchers的添加方式更改为从数组头开始添加
 			// 遍历从数组尾部开始遍历
@@ -338,12 +338,12 @@ describe('Scope', function() {
 				function(newValue, oldValue, scope) {
 					destroyWatch();
 				}
-			);
+				);
 
 			var destroyWatch = scope.$watch(
 				function(scope) { },
 				function(newValue, oldValue, scope) { }
-			);
+				);
 
 
 			scope.$watch(
@@ -351,7 +351,7 @@ describe('Scope', function() {
 				function(newValue, oldValue, scope) {
 					scope.counter++;
 				}
-			);
+				);
 
 			// 执行$digest()方法前，3个watch都已经添加进$$watchers
 			// 第一个watch执行listenerFn时才删除第二个watcher
@@ -362,27 +362,339 @@ describe('Scope', function() {
 
 
 		it('allows destroying several $watches during digest', function() {
-		  	scope.aValue = 'abc';
-		  	scope.counter = 0;
+			scope.aValue = 'abc';
+			scope.counter = 0;
 			var destroyWatch1 = scope.$watch(
-		  		function(scope) {
-		    		destroyWatch1();
+				function(scope) {
+					destroyWatch1();
 					destroyWatch2();
 				}
-			); 
+				); 
 
 			var destroyWatch2 = scope.$watch(
-		  		function(scope) { return scope.aValue; },
-		  		function(newValue, oldValue, scope) {
+				function(scope) { return scope.aValue; },
+				function(newValue, oldValue, scope) {
+					scope.counter++;
+				}
+				);
+
+			scope.$digest();
+			expect(scope.counter).toBe(0);
+		});
+
+		it('has a $$phase field whose value is the current digest phase', function() {
+			scope.aValue = [1, 2, 3];
+			scope.phaseInWatchFunction = undefined;
+			scope.phaseInListenerFunction = undefined;
+			scope.phaseInApplyFunction = undefined;
+
+			scope.$watch(
+				function(scope) {
+					scope.phaseInWatchFunction = scope.$$phase;
+					return scope.aValue;
+				},
+				function(newValue, oldValue, scope) {
+					scope.phaseInListenerFunction = scope.$$phase;
+				}
+				);
+
+			scope.$apply(function(scope) {
+				scope.phaseInApplyFunction = scope.$$phase;
+			});
+
+			expect(scope.phaseInWatchFunction).toBe('$digest');
+			expect(scope.phaseInListenerFunction).toBe('$digest');
+			expect(scope.phaseInApplyFunction).toBe('$apply');
+		});
+
+
+	});
+});
+
+
+describe('$eval', function() {
+
+	var scope;
+	beforeEach(function() {
+		scope = new Scope();
+	});
+
+	it('executes $evaled function and returns result', function() {
+		scope.aValue = 42;
+		var result = scope.$eval(function(scope) {
+			return scope.aValue;
+		});
+
+		expect(result).toBe(42);
+	});
+
+
+	it('passes the second $eval argument straight through', function() {
+		scope.aValue = 42;
+		var result = scope.$eval(function(scope, arg) {
+			return scope.aValue + arg;
+		}, 2);
+
+		expect(result).toBe(44);
+	});
+
+});
+
+
+describe('$apply', function() {
+
+	var scope;
+	beforeEach(function() {
+		scope = new Scope();
+	});
+
+	it('executes the given function and starts the digest', function() {
+		scope.aValue = 'someValue';
+		scope.counter = 0;
+
+		scope.$watch(
+			function(scope) {
+				return scope.aValue;
+			},
+			function(newValue, oldValue, scope) {
+				scope.counter++;
+			}
+			);
+
+		scope.$digest();
+		expect(scope.counter).toBe(1);
+
+		scope.$apply(function(scope) {
+			scope.aValue = 'someOtherValue';
+		});
+
+		expect(scope.counter).toBe(2);
+
+	});
+
+});
+
+describe('$evalAsync', function() {
+	var scope;
+	beforeEach(function() {
+		scope = new Scope();
+	});
+
+
+	it('executes given function later in the same cycle', function() {
+		scope.aValue = [1, 2, 3];
+		scope.asyncEvaluated = false;
+		scope.asyncEvaluatedImmediately = false;
+
+		scope.$watch(
+			function(scope) { return scope.aValue; },
+			function(newValue, oldValue, scope) {
+				scope.$evalAsync(function(scope) {
+					// 希望延迟执行
+					scope.asyncEvaluated = true;
+				});
+				// 只在$digest()的第一轮执行
+				// 第二轮aValue没有变化将不执行listenerFn
+				scope.asyncEvaluatedImmediately = scope.asyncEvaluated;
+			}
+			);
+
+		scope.$digest();
+		expect(scope.asyncEvaluated).toBe(true);
+		expect(scope.asyncEvaluatedImmediately).toBe(false);
+	});
+
+
+	it('executes $evalAsynced functions added by watch functions', function() {
+		scope.aValue = [1, 2, 3];
+		scope.asyncEvaluated = false;
+		scope.$watch(
+			function(scope) {
+				if (!scope.asyncEvaluated) {
+					scope.$evalAsync(function(scope) {
+						scope.asyncEvaluated = true;
+					});
+				}
+				return scope.aValue;
+			},
+			function(newValue, oldValue, scope) { }
+			);
+
+		scope.$digest();
+		expect(scope.asyncEvaluated).toBe(true);
+	});
+
+
+	it('executes $evalAsynced functions even when not dirty', function() {
+		scope.aValue = [1, 2, 3];
+		scope.asyncEvaluatedTimes = 0;
+
+      // $watch方法是每次$digest循环都会调用的
+      scope.$watch(
+      	function(scope) {
+      		if (scope.asyncEvaluatedTimes < 2) {
+      			scope.$evalAsync(function(scope) {
+      				scope.asyncEvaluatedTimes++;
+      			});
+      		}
+      		return scope.aValue;
+      	},
+      	function(newValue, oldValue, scope) { }
+      	);
+
+      scope.$digest();
+
+      expect(scope.asyncEvaluatedTimes).toBe(2);
+  	});
+
+
+	it('eventually halts $evalAsyncs added by watches', function() {
+		scope.aValue = [1, 2, 3];
+
+		scope.$watch(
+			function(scope) {
+				scope.$evalAsync(function(scope) { });
+				return scope.aValue;
+			},
+			function(newValue, oldValue, scope) { }
+		);
+
+		expect(function() { scope.$digest(); }).toThrow();
+	});
+
+	it('schedules a digest in $evalAsync', function(done) {
+		scope.aValue = 'abc';
+		scope.counter = 0;
+
+		scope.$watch(
+			function(scope) { return scope.aValue; },
+			function(newValue, oldValue, scope) {
+				scope.counter++;
+			}
+		);
+
+		scope.$evalAsync(function(scope) { });
+		expect(scope.counter).toBe(0);
+
+		setTimeout(function() {
+			expect(scope.counter).toBe(1);
+			done();
+		}, 50);
+	});
+
+
+	describe('$applyAsync', function() {
+
+		var scope;
+
+		beforeEach(function() {
+			scope = new Scope();
+		});
+
+		it('allows async $apply with $applyAsync', function(done) {
+			scope.counter = 0;
+
+			scope.$watch(
+				function(scope) { return scope.aValue; },
+				function(newValue, oldValue, scope) {
 					scope.counter++;
 				}
 			);
 
 			scope.$digest();
-		  	expect(scope.counter).toBe(0);
+			expect(scope.counter).toBe(1);
+
+			scope.$applyAsync(function(scope) {
+				scope.aValue = 'abc';
+			});
+			expect(scope.counter).toBe(1);
+
+			setTimeout(function() {
+				expect(scope.counter).toBe(2);
+				done();
+			}, 50);
+		});
+
+		it('never executes $applyAsynced function in the same cycle', function(done) {
+			scope.aValue = [1, 2, 3];
+			scope.asyncApplied = false;
+			scope.asyncAppliedImmediately = false;
+
+			scope.$watch(
+				function(scope) { return scope.aValue; },
+				function(newValue, oldValue, scope) {
+					scope.$applyAsync(function(scope) {
+						scope.asyncApplied = true;
+					});
+				}
+			);
+
+			scope.$digest();
+			expect(scope.asyncApplied).toBe(false);
+			setTimeout(function() {
+				expect(scope.asyncApplied).toBe(true);
+				done();
+			}, 50);
 		});
 
 
+		it('coalesces many calls to $applyAsync', function(done) {
+			scope.counter = 0;
+
+			scope.$watch(
+				function(scope) {
+					scope.counter++;
+					return scope.aValue;
+				},
+				function(newValue, oldValue, scope) { }
+			);
+
+			scope.$applyAsync(function(scope) {
+				scope.aValue = 'abc';
+			});
+			scope.$applyAsync(function(scope) {
+				scope.aValue = 'def';
+			});
+
+			// 只通过一个$digest循环执行$$applyAsyncQueue的全部任务
+
+			setTimeout(function() {
+				expect(scope.counter).toBe(2);
+				done();
+			}, 50);
+		});
+
+
+		it('cancels $applyAsync if digested first', function(done) {
+			scope.counter = 0;
+
+			scope.$watch(
+				function(scope) {
+					scope.counter++;
+					return scope.aValue;
+				},
+				function(newValue, oldValue, scope) { }
+			);
+
+			scope.$applyAsync(function(scope) {
+				scope.aValue = 'abc';
+			});
+			scope.$applyAsync(function(scope) {
+				scope.aValue = 'def';
+			});
+
+			scope.$digest();
+			expect(scope.counter).toBe(2);
+			expect(scope.aValue).toEqual('def');
+
+			setTimeout(function() {
+				expect(scope.counter).toBe(2);
+				done();
+			}, 50);
+		});
+
 
 	});
+
+
 });
